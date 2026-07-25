@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 
 class SwarmPlotter:
     def __init__(self, State):
-        self.state = np.array(State).flatten()
-        self.num_agents = len(self.state) // 4
+        self.state = State
+        self.num_agents = len(self.state[:,0]) // 4
         
         # Turn on interactive mode for real-time plotting
         plt.ion() 
@@ -15,10 +15,10 @@ class SwarmPlotter:
         self.ax.set_ylabel("Y Position")
         self.ax.grid(True)
         
-        # Extract initial positions
-        x_pos, y_pos = self._extract_positions(self.state)
+        # Initialize the scatter object. Extract initial positions
+        x_pos = self.state[:,0]
+        y_pos = self.state[:,1]
         
-        # Initialize the scatter object
         self.scatter = self.ax.scatter(x_pos, y_pos, color='blue', edgecolors='k', zorder=3)
         
         # Set fixed or generous limits so the window doesn't bounce around
@@ -29,17 +29,12 @@ class SwarmPlotter:
         self.ax.set_xlim(min_x, max_x)
         self.ax.set_ylim(min_y, max_y)
 
-    def _extract_positions(self, state):
-        reshaped = state.reshape(self.num_agents, 4)
-        return reshaped[:, 0], reshaped[:, 1]
-
     def update_frame(self, state):
         """Updates the plot data and redraws the canvas."""
-        self.state = np.array(state).flatten()
-        x_pos, y_pos = self._extract_positions(self.state)
+        self.state = state
+        positions = self.state[:,0:2]
         
         # Update the dot positions
-        positions = np.column_stack((x_pos, y_pos))
         self.scatter.set_offsets(positions)
         
         # 3. Force matplotlib to flush the graphics to the screen

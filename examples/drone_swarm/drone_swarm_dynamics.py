@@ -5,8 +5,8 @@
 import numpy as np
 
 class SwarmDynamics:
-    def __init__(self, agents, initial_state, frequency):
-        self.agents = agents
+    def __init__(self, initial_state, frequency):
+        self.agents = len(initial_state[:,0])
         self.State = initial_state
         self.num_states = 4
         self.num_inputs = 2
@@ -48,14 +48,11 @@ class SwarmDynamics:
         U = self.Input
         
         # calculate damping coefficient vector b
-        v_mag = np.sqrt(X[:,2]**2 + X[:,3]**2)
-        b = (self.mu*self.m*self.g*v_mag)/self.v_nom
+        b = (self.mu*self.m*self.g)/self.v_nom
         
         # calculate state derivative matrix
         X_dot = np.zeros((self.agents, self.num_states))
-        X_dot[:,0] = X[:,2]
-        X_dot[:,1] = X[:,3]
-        X_dot[:,2] = (U[:,0] - b*X[:,2])*self.m
-        X_dot[:,3] = (U[:,1] - b*X[:,3])*self.m
+        X_dot[:,0:2] = X[:,2:4]
+        X_dot[:,2:4] = (U[:,0:2] - b*X[:,2:4])/self.m
         
         return X_dot
