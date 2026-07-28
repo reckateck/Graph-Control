@@ -9,6 +9,8 @@ from drone_swarm_dynamics import SwarmDynamics
 SIM_LENGTH = 15 # seconds
 SIM_FREQUENCY = 60 # hertz
 PLOT_FREQUENCY = 10 # hertz
+TOTAL_STEPS = int(SIM_LENGTH*SIM_FREQUENCY)
+STEPS_PER_PLOT = int(SIM_FREQUENCY/PLOT_FREQUENCY)
 AGENTS = 10
 RAD = 0.25
 
@@ -28,35 +30,27 @@ INITIAL_STATE[:, 2:4] = np.ones_like(pos)
 # instantiate classes and initialize states
 plotter = SwarmPlotter(INITIAL_STATE)
 dynamics = SwarmDynamics(INITIAL_STATE, SIM_FREQUENCY)
-
-# start timer
-current_time = 0.0
-next_plot = 0.0
 start_time = time.perf_counter()
-
-while current_time < SIM_LENGTH:
-    while current_time < next_plot:
-        
-        # first step: find input via controller
-        if current_time - start_time < 1.0:
-            #u = np.ones_like(pos)
-            u = np.zeros_like(pos)
-        else:
-            u = np.zeros_like(pos)
-        
-        # Step 2: update dynamics
-        x = dynamics.State
-        dynamics.update(x,u)
-
-        # step 3: add time step
-        time.sleep(1.0/SIM_FREQUENCY) # change if using multiple threads
-        current_time = time.perf_counter() - start_time
-        
-    # update animation
-    plotter.update_frame(dynamics.State)
+for n in range(TOTAL_STEPS):
+    # figure out state (i'm assuming perfect sensors so the state is pulled directly from dynamics)
+    t = n * 1/SIM_FREQUENCY
+    State = dynamics.State
     
-    # update next plot time
-    next_plot = current_time + 1/PLOT_FREQUENCY
+    # determine control input
+    if t < 1.0:
+        u = np.ones_like(pos)
+    else:
+        u = np.zeros_like(pos)
+    
+    # calculate state 
+    next_state = dynamics.update(State=State,Input=u)
+    
+    # Plot and animate system
+    if n % STEPS_PER_PLOT == 0:
+        plotter.update_frame(state=next_state)
+    
+    # pause for animation
+    time.sleep(1/SIM_FREQUENCY)
     
 ### Display Simulation Metrics ###
 print(f"Simulation took {time.perf_counter() - start_time} seconds")
