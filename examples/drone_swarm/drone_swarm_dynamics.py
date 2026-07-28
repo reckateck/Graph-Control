@@ -15,9 +15,9 @@ class SwarmDynamics:
         
         # define physics parameters
         self.m = 1 # kg
-        self.v_nom = 1 # m/s
         self.mu = 0.3 # friction coeff [unitless]
         self.g = 9.81 # m/s^2
+        self.k_frict = 50
         
     def update(self, State, Input):
         """update dynamics forward one time step into the future"""
@@ -31,7 +31,7 @@ class SwarmDynamics:
         return self.State
         
     def rk4(self):
-        """Use Runge-Kutta 4 to numerically integrate state forward one timestep"""
+        """Use Time Invariant Runge-Kutta 4 to numerically integrate the state forward one timestep"""
         # calculate derivative slopes
         k1 = self.states_dot(statestep = 0)
         k2 = self.states_dot(statestep=k1*self.dt/2.0)
@@ -47,12 +47,13 @@ class SwarmDynamics:
         X = self.State + statestep
         U = self.Input
         
-        # calculate damping coefficient vector b
-        b = (self.mu*self.m*self.g)/self.v_nom
+        # calculate regularized coulomb friction to remove RK$ chatter
+        V = X[:,2:4]
+        F_friction = -self.mu*self.m*self.g * np.tanh(self.k_frict * V)
         
         # calculate state derivative matrix
         X_dot = np.zeros((self.agents, self.num_states))
         X_dot[:,0:2] = X[:,2:4]
-        X_dot[:,2:4] = (U[:,0:2] - b*X[:,2:4])/self.m
+        X_dot[:,2:4] = (U[:,0:2] + F_friction) / self.m
         
         return X_dot
