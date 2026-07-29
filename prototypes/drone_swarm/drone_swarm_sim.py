@@ -11,7 +11,7 @@ SIM_FREQUENCY = 60 # hertz
 PLOT_FREQUENCY = 10 # hertz
 TOTAL_STEPS = int(SIM_LENGTH*SIM_FREQUENCY)
 STEPS_PER_PLOT = int(SIM_FREQUENCY/PLOT_FREQUENCY)
-AGENTS = 10
+AGENTS = 100
 RAD = 0.25
 
 # Generate the graph
@@ -19,7 +19,7 @@ G = nx.random_geometric_graph(n=AGENTS, radius=RAD, dim=2)
 
 # Extract positions and convert dictionary values to a NumPy array
 pos_dict = nx.get_node_attributes(G, "pos")
-pos = np.array(list(pos_dict.values())) * 10  # Scale up from unit square
+pos = np.array(list(pos_dict.values())) * 100  # Scale up from unit square
 
 # Define global initial state: shape (N, 4) -> [x, y, vx, vy]
 INITIAL_STATE = np.zeros((len(pos), 4))
@@ -48,9 +48,8 @@ for n in range(TOTAL_STEPS):
     # Plot and animate system
     if n % STEPS_PER_PLOT == 0:
         plotter.update_frame(state=next_state)
-    
-    # pause for animation
-    time.sleep(1/SIM_FREQUENCY)
+        plt.pause(0.001)
+
     
 ### Display Simulation Metrics ###
 print(f"Simulation took {time.perf_counter() - start_time} seconds")

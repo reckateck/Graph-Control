@@ -1,32 +1,12 @@
-# metapyp
+# graph-control
 
-`metapyp` is an open-source, general-purpose Python library designed for the rapid modeling, simulation, and control of complex **metapopulation networks**. 
+`graph-control` is an open-source research initiative designed to extract unified abstraction patterns across complex network control problems by bridging aerospace guidance/navigation/control (GNC), urban systems, and network theory.
 
-By bridging the gap between aerospace guidance, navigation, and control (GNC) architectures and network theory, `metapyp` treats complex urban, ecological, and multi-agent systems as engineered machines. 
-It decouples network topology from local dynamics, allowing users to plug in arbitrary governing differential equations and evaluate centralized or distributed control laws.
+## Development Approach: Prototype-Driven Framework Design
+Rather than designing abstract interfaces top-down, `graph-control` is built by implementing concrete simulation testbeds across distinct domain problems to identify shared math, state representation, and graph-coupling dynamics:
 
----
+* **`prototypes/drone_swarm/`** *(Active)*: Multi-agent spatial coordination using double-integrator dynamics, regularized friction, and NetworkX geometric graph topologies.
+* **`prototypes/epidemic_metapopulation/`** *(Planned)*: Spatial SIR/SEIR dynamics coupled via transport network matrices.
+* **`prototypes/infrastructure_flow/`** *(Planned)*: Cascading capacity and failure propagation on Directed Acyclic Graphs (DAGs).
 
-## Core Features
-
-* **Flexible Graph Ingestion:** Generate idealized topologies (e.g., Watts-Strogatz Small-World) or stream real-world spatial infrastructure directly from OpenStreetMap (`osmnx`) and GraphML files.
-* **Context-Agnostic Dynamics:** A plug-and-play physics engine that maps arbitrary, user-defined node attributes directly into fast NumPy state matrices.
-* **GNC-Style Control Loop:** Built around a classic closed-loop feedback structure: Reference Signal -> Controller -> Plant -> Observer.
-* **High Performance:** Core network coupling and transport calculations are vectorized using matrix-based graph Laplacian operations.
-
----
-
-## Project Architecture
-
-The library separates the simulation into modular components, mirroring a standard control system layout:
-
-```text
-metapyp/
-├── .github/workflows/    # Continuous Integration (Automated testing via GitHub Actions)
-├── metapyp/              # Core source package
-│   ├── __init__.py
-│   ├── generators.py     # Graph Factory (Procedural, files, OSM)
-│   ├── dynamics.py       # Plant/Physics Engine & state compiler
-│   ├── controllers.py    # Global and distributed control policies
-│   └── models.py         # Plug-and-play equations (SIR, Diffusion, etc.)
-└── tests/                # Unit test suite (via pytest)
+The core engine (`graph-control/`) is being implemented by extracting common state-space compilation, integration, and graph-coupling logic across these case studies.
