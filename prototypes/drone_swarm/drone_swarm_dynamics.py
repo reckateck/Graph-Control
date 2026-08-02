@@ -5,19 +5,19 @@
 import numpy as np
 
 class SwarmDynamics:
-    def __init__(self, initial_state, frequency):
+    def __init__(self, initial_state, frequency, Param):
         self.agents = len(initial_state[:,0])
         self.State = initial_state
-        self.num_states = 4
-        self.num_inputs = 2
+        self.num_states = Param["num_states"]
+        self.num_inputs = Param["num_inputs"]
         self.Input = np.zeros((self.agents, self.num_inputs))
         self.dt = 1/frequency
         
         # define physics parameters
-        self.m = 1 # kg
-        self.mu = 0.3 # friction coeff [unitless]
-        self.g = 9.81 # m/s^2
-        self.k_frict = 50
+        self.m       = Param["m"] # kg
+        self.mu      = Param["mu"] # friction coeff [unitless]
+        self.g       = Param["g"] # m/s^2
+        self.k_frict = Param["k_frict"]
         
     def update(self, State, Input):
         """update dynamics forward one time step into the future"""
@@ -42,7 +42,7 @@ class SwarmDynamics:
         self.State = self.State + self.dt/6.0 * (k1 + 2*k2 + 2*k3 + k4)
         
     def states_dot(self, statestep):
-        """Calcluate current timestep's state derivative"""
+        """Calcluate current timestep's state derivative for numerical integration"""
         # reshape global state vector into matrix (# of agents x # of local states) for vectorized computation
         X = self.State + statestep
         U = self.Input
@@ -57,3 +57,21 @@ class SwarmDynamics:
         X_dot[:,2:4] = (U[:,0:2] + F_friction) / self.m
         
         return X_dot
+    
+    def states_dot_ss(self, State, Input):
+            """Calcluate the state derivative"""
+            # reshape global state vector into matrix (# of agents x # of local states) for vectorized computation
+            X = State 
+            U = Input
+            
+            # calculate coulomb friction
+            V = X[:,2:4]
+            F_friction = -self.mu*self.m*self.g * np.sign(V)
+            
+            # calculate state derivative matrix
+            X_dot = np.zeros((self.agents, self.num_states))
+            X_dot[:,0:2] = X[:,2:4]
+            X_dot[:,2:4] = (U[:,0:2] + F_friction) / self.m
+            
+            return X_dot
+        

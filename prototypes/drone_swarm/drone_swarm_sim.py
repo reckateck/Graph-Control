@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import time
 from drone_swarm_plotter import SwarmPlotter
 from drone_swarm_dynamics import SwarmDynamics
+from drone_swarm_param import Param
 
 ### Global Simulation Parameters ###
 SIM_LENGTH = 15 # seconds
@@ -29,7 +30,7 @@ INITIAL_STATE[:, 2:4] = np.ones_like(pos)
 ### main simulation loop ###
 # instantiate classes and initialize states
 plotter = SwarmPlotter(INITIAL_STATE)
-dynamics = SwarmDynamics(INITIAL_STATE, SIM_FREQUENCY)
+dynamics = SwarmDynamics(INITIAL_STATE, SIM_FREQUENCY, Param)
 start_time = time.perf_counter()
 for n in range(TOTAL_STEPS):
     # figure out state (i'm assuming perfect sensors so the state is pulled directly from dynamics)
