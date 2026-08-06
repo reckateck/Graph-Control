@@ -5,6 +5,7 @@ import time
 from drone_swarm_plotter import SwarmPlotter
 from drone_swarm_dynamics import SwarmDynamics
 from drone_swarm_param import Param
+from drone_swarm_controller import SwarmController
 
 ### Global Simulation Parameters ###
 SIM_LENGTH = 15 # seconds
@@ -17,6 +18,9 @@ RAD = 0.25
 
 # Generate the graph
 G = nx.random_geometric_graph(n=AGENTS, radius=RAD, dim=2)
+
+# laplacian matrix of the graph
+Param["L"] = nx.laplacian_matrix(G)
 
 # Extract positions and convert dictionary values to a NumPy array
 pos_dict = nx.get_node_attributes(G, "pos")
@@ -31,6 +35,8 @@ INITIAL_STATE[:, 2:4] = np.ones_like(pos)
 # instantiate classes and initialize states
 plotter = SwarmPlotter(INITIAL_STATE)
 dynamics = SwarmDynamics(INITIAL_STATE, SIM_FREQUENCY, Param)
+controller = SwarmController(Param, INITIAL_STATE)
+
 start_time = time.perf_counter()
 for n in range(TOTAL_STEPS):
     # figure out state (i'm assuming perfect sensors so the state is pulled directly from dynamics)
@@ -38,10 +44,7 @@ for n in range(TOTAL_STEPS):
     State = dynamics.State
     
     # determine control input
-    if t < 1.0:
-        u = np.ones_like(pos)
-    else:
-        u = np.zeros_like(pos)
+    u = controller.update(State)
     
     # calculate state 
     next_state = dynamics.update(State=State,Input=u)

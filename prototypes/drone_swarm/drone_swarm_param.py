@@ -22,3 +22,6 @@ Param["num_inputs"] = Param["B"].shape[1]
 ### Controller Parameters ###
 Param["Q"] = np.array([[1.0, 0, 0, 0], [0, 1.0, 0, 0], [0, 0, 1.0, 0], [0, 0, 0, 1.0]])
 Param["R"] = 1.0 * np.eye(2)
+
+Param["u_min"] = -10
+Param["u_max"] = 10
