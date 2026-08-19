@@ -5,7 +5,7 @@ class SwarmController:
     def __init__(self, Param, Initial_state):
         self.A = Param["A"]
         self.B = Param["B"]
-        self.L = Param["L"]
+        self.L = Param["L"].toarray().astype(float)
         
         self.agents = len(Initial_state[:,0])
         self.State = Initial_state
@@ -25,20 +25,20 @@ class SwarmController:
         self.K = self.calculate_gains()
         
     def update(self, state):
-        # reshape state and input into a vector for control law
+        # reshape state into a vector for control law
         self.state = np.reshape(state, (self.agents*self.num_states, 1))
-        self.state = np.reshape(state, (self.agents*self.num_inputs, 1))
         
         # calculate control input using consensus
-        u_tilde = -np.kron(self.L, self.K) @ self.state
+        kron_prod = np.kron(self.L, self.K)
+        u_tilde = -kron_prod @ self.state
         
         # saturate input
         u_sat = self.saturate(u_tilde)
         
         # feedback linearization (adding friction back to the input)
-        V = np.reshape(state[:, 2:4], (self.agents*self.num_states, 1))
+        V = np.reshape(state[:, 2:4], (self.agents*2, 1))
         F = self.friction * np.tanh(self.k_frict * V)
-        u = u_sat + F
+        self.input = u_sat + F
         
         return self.input
     
@@ -51,7 +51,9 @@ class SwarmController:
         
         # extract optimal gains matrix
         R_inv = np.linalg.inv(self.R)
-        self.K = R_inv @ self.B.T @ P
+        K = R_inv @ self.B.T @ P
+        
+        return K
         
     def kalman_controllability(self):
         # initialize controllability matrix
@@ -74,10 +76,5 @@ class SwarmController:
         
     def saturate(self, u):
         """Saturate input"""
-        if np.min(u) < self.u_min:
-            # set all less than u_min to u_min
-        if u > self.u_max:
-            # set all greater than u_max to u_max
-      
-        return u_sat
+        return np.clip(u, self.u_min, self.u_max)
           
